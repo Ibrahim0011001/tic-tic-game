@@ -1,3 +1,5 @@
 class Player {}
 
-class Game {}
+class Game {
+  void playgame(int index, String activeplayer) {}
+}
