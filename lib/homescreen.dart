@@ -13,7 +13,7 @@ class _HomescreenState extends State<Homescreen> {
   String activeplayer = 'X';
   bool gameOver = false;
   int turn = 0;
-  String result = 'XXXXX';
+  String result = '';
   Game game = Game();
   bool isswitched = false;
   @override
@@ -62,9 +62,16 @@ class _HomescreenState extends State<Homescreen> {
                               borderRadius: BorderRadius.circular(16)),
                           child: Center(
                             child: Text(
-                              "X",
-                              style:
-                                  TextStyle(color: Colors.blue, fontSize: 52),
+                              Player.playerx.contains(index)
+                                  ? 'X'
+                                  : Player.playero.contains(index)
+                                      ? 'O'
+                                      : '',
+                              style: TextStyle(
+                                  color: Player.playerx.contains(index)
+                                      ? Colors.blue
+                                      : Colors.pink,
+                                  fontSize: 52),
                             ),
                           ),
                         ),
@@ -81,6 +88,9 @@ class _HomescreenState extends State<Homescreen> {
             ElevatedButton.icon(
               onPressed: () {
                 setState(() {
+                  Player.playerx = [];
+                  Player.playero = [];
+
                   activeplayer = 'X';
                   gameOver = false;
                   turn = 0;
@@ -96,7 +106,29 @@ class _HomescreenState extends State<Homescreen> {
     );
   }
 
-  _ontap(int index) {
-    game.playgame(index, activeplayer);
+  _ontap(int index) async {
+    if (Player.playerx.isEmpty ||
+        !Player.playerx.contains(index) && Player.playero.isEmpty ||
+        !Player.playero.contains(index)) {
+      game.playgame(index, activeplayer);
+
+      updatestate();
+      if (!isswitched && !gameOver && turn != 9) {
+        await game.autoplay(activeplayer);
+        updatestate();
+      }
+    }
+  }
+
+  void updatestate() {
+    return setState(() {
+      activeplayer = (activeplayer == 'X') ? 'O' : 'X';
+      turn++;
+      String winnerplayer = game.checkwinner();
+      if (winnerplayer != '') {
+        gameOver = true;
+        result = '$winnerplayer is the winner';
+      } else if (!gameOver && turn == 9) result = 'it\'s draw';
+    });
   }
 }
